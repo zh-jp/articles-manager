@@ -2,7 +2,7 @@
 
 <template>
   <div>I'm app</div>
-  <test-demo></test-demo>
+  <router-view></router-view>
 </template>
 
 <style scoped></style>
