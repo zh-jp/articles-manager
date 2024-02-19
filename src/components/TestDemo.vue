@@ -1,6 +1,6 @@
+<script setup lang="ts">
+import LoginPage from '@/views/login/LoginPage.vue'
+</script>
 <template>
-  <div>
-    <h1>TestDemo</h1>
-    <el-button>Click me</el-button>
-  </div>
+  <LoginPage></LoginPage>
 </template>
