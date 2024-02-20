@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { User, Lock } from '@element-plus/icons-vue'
-import type { FormInstance, FormRules } from 'element-plus'
-
-const ruleFormRef = ref<FormInstance>()
+import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { userRegisterService, userLoginService } from '@/api/user'
+import { useUserStore } from '@/stores'
+import { useRouter } from 'vue-router'
 
 const isRegister = ref(false)
 
@@ -12,27 +13,11 @@ const ruleForm = reactive({
   password: '',
   repassword: ''
 })
-
-const validateUsername = (rule: any, value: any, callback: any) => {
-  if (value === '') {
-    callback(new Error('请输入用户名'))
-  } else if (value.length < 5 || value.length > 10) {
-    callback(new Error('长度在 5 到 10 个字符'))
-  } else {
-    callback()
-  }
-}
-
-const validatePass = (rule: any, value: any, callback: any) => {
-  const regex = /^\S{6,15}$/
-  if (value === '') {
-    callback(new Error('请输入密码'))
-  } else if (!regex.test(value)) {
-    callback(new Error('密码长度在6-15个非空字符'))
-  } else {
-    callback()
-  }
-}
+watch(isRegister, () => {
+  ruleForm.username = ''
+  ruleForm.password = ''
+  ruleForm.repassword = ''
+})
 
 const validateRePass = (rule: any, value: any, callback: any) => {
   if (!value) {
@@ -45,25 +30,48 @@ const validateRePass = (rule: any, value: any, callback: any) => {
 }
 
 const rules = reactive<FormRules<typeof ruleForm>>({
-  username: [{ validator: validateUsername, trigger: 'blur' }],
-  password: [{ validator: validatePass, trigger: 'blur' }],
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 5, max: 10, message: '用户名必须是 5-10位 的字符', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    {
+      pattern: /^\S{6,15}$/,
+      message: '密码必须是 6-15位 的非空字符',
+      trigger: 'blur'
+    }
+  ],
   repassword: [{ validator: validateRePass, trigger: 'blur' }]
 })
 
+const ruleFormRef = ref<FormInstance>() // 与表单DOM元素绑定
+
 const register = async (form: FormInstance | undefined) => {
   if (!form) return
-  console.log(form)
-
-  await form.validate()
+  await form.validate(async (valid) => {
+    if (valid) {
+      await userRegisterService(ruleForm)
+      ElMessage.success('注册成功')
+      isRegister.value = false
+    } else {
+      return false
+    }
+  })
 }
-
+const userStore = useUserStore()
+const router = useRouter()
 const login = async (form: FormInstance | undefined) => {
   if (!form) return
-  await form.validate((valid) => {
+  await form.validate(async (valid) => {
     if (valid) {
-      console.log(true)
+      const {
+        data: { token }
+      } = await userLoginService(ruleForm)
+      ElMessage.success('登录成功')
+      userStore.setToken(token)
+      router.push('/')
     } else {
-      console.log(false)
       return false
     }
   })
@@ -140,7 +148,7 @@ const login = async (form: FormInstance | undefined) => {
             placeholder="请输入用户名"
           ></el-input
         ></el-form-item>
-        <el-form-item>
+        <el-form-item prop="password">
           <el-input
             v-model="ruleForm.password"
             :prefix-icon="Lock"

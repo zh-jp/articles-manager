@@ -1,12 +1,14 @@
 import axios from 'axios'
 import { useUserStore } from '@/stores'
-import { ElMessage } from 'element-plus'
+
 import router from '@/router'
+import { ElMessage } from 'element-plus'
+import 'element-plus/es/components/message/style/css'
 const baseURL: string = 'http://big-event-vue-api-t.itheima.net'
 
 const instance = axios.create({
   baseURL,
-  timeout: 5000
+  timeout: 10000
 })
 
 // 添加请求拦截器
@@ -39,10 +41,11 @@ instance.interceptors.response.use(
   },
   function (error) {
     // 若是 401 表示权限不足或token过期
+    console.log(error)
+
     if (error.response.data.code === 401) {
       router.push('/login')
     }
-
     // 超出 2xx 范围的状态码都会触发该函数。
     // 对响应错误做点什么
     ElMessage.error(error.response.data.message || '服务异常')
