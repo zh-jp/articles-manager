@@ -2,8 +2,7 @@ import axios from 'axios'
 import { useUserStore } from '@/stores'
 
 import router from '@/router'
-import { ElMessage } from 'element-plus'
-import 'element-plus/es/components/message/style/css'
+
 const baseURL: string = 'http://big-event-vue-api-t.itheima.net'
 
 const instance = axios.create({
