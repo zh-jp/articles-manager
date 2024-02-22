@@ -10,15 +10,12 @@ import {
   SwitchButton
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores'
-import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import avatar from '@/assets/default.png'
 
 const userStore = useUserStore()
-// 初始渲染，创建和插入DOM节点时调用 onMounted
-onMounted(() => {
-  userStore.getUser()
-})
+
+userStore.getUser()
 const router = useRouter()
 const handleCommand = async (key: string) => {
   if (key == 'logout') {
@@ -48,13 +45,13 @@ const handleCommand = async (key: string) => {
         text-color="#fff"
         router
       >
-        <el-menu-item index="/article/channel">
-          <el-icon><Promotion /></el-icon>
-          <span>文章分类</span>
-        </el-menu-item>
         <el-menu-item index="/article/manage">
           <el-icon><Management /></el-icon>
           <span>文章管理</span>
+        </el-menu-item>
+        <el-menu-item index="/article/channel">
+          <el-icon><Promotion /></el-icon>
+          <span>文章分类</span>
         </el-menu-item>
 
         <el-sub-menu index="/user/profile">
@@ -94,18 +91,20 @@ const handleCommand = async (key: string) => {
           </span>
           <!-- 展开时的显示 -->
           <template #dropdown>
-            <el-dropdown-menu command="profile" :icon="User"
-              >基本资料</el-dropdown-menu
-            >
-            <el-dropdown-menu command="avatar" :icon="Crop"
-              >更换头像</el-dropdown-menu
-            >
-            <el-dropdown-menu command="password" :icon="EditPen"
-              >重置密码</el-dropdown-menu
-            >
-            <el-dropdown-menu command="logout" :icon="SwitchButton"
-              >退出登录</el-dropdown-menu
-            >
+            <el-dropdown-menu
+              ><el-dropdown-item command="profile" :icon="User"
+                >基本资料</el-dropdown-item
+              >
+              <el-dropdown-item command="avatar" :icon="Crop"
+                >更换头像</el-dropdown-item
+              >
+              <el-dropdown-item command="password" :icon="EditPen"
+                >重置密码</el-dropdown-item
+              >
+              <el-dropdown-item command="logout" :icon="SwitchButton"
+                >退出登录</el-dropdown-item
+              >
+            </el-dropdown-menu>
           </template>
         </el-dropdown>
       </el-header>
@@ -134,7 +133,7 @@ const handleCommand = async (key: string) => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    .el-dropout__box {
+    .el-dropdown__box {
       display: flex;
       align-items: center;
       .el-icon {
