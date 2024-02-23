@@ -1,3 +1,16 @@
+1. 使用 pnpm 管理依赖
+```bash
+npm install -g pnpm
+```
+2. 安装 package.json 中的依赖
+```bash
+pnpm install
+```
+3. 启动项目
+```bash
+pnpm dev
+```
+
 # 技术栈
 TypeScript
 Vue Router

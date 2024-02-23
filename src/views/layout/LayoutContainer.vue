@@ -14,7 +14,6 @@ import { useRouter } from 'vue-router'
 import avatar from '@/assets/default.png'
 
 const userStore = useUserStore()
-
 userStore.getUser()
 const router = useRouter()
 const handleCommand = async (key: string) => {
