@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { getChannelListService } from '@/api/articleChannel'
+import {
+  getChannelListService,
+  deleteChannelService
+} from '@/api/articleChannel'
 import { Delete, Edit } from '@element-plus/icons-vue'
+import ChannelEdit from '@/views/article/components/ChannelEdit.vue'
 const loading = ref(false)
 const channelList = ref([])
+const dialog = ref()
 const getChannelList = async () => {
   loading.value = true
   const { data } = await getChannelListService()
@@ -11,9 +16,29 @@ const getChannelList = async () => {
   loading.value = false
 }
 getChannelList()
-const onAddChannel = () => {}
-const onEditChannel = (row: object) => {}
-const onDelChanel = (row: object) => {}
+const onAddChannel = () => {
+  dialog.value.open({})
+}
+const onEditChannel = (row: Record<string, any>) => {
+  row.is_edit = true
+  dialog.value.open(row)
+}
+const onDelChanel = (row: object | any) => {
+  ElMessageBox.confirm('确认要删除该分类吗?', 'Warning', {
+    confirmButtonText: '删除',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(() => {
+      deleteChannelService(row.id)
+      ElMessage.success('删除成功')
+      getChannelList()
+    })
+    .catch(() => {})
+}
+const onSuccess = () => {
+  getChannelList()
+}
 </script>
 
 <template>
@@ -48,6 +73,7 @@ const onDelChanel = (row: object) => {}
         <el-empty description="暂时还没有文章分类" />
       </template>
     </el-table>
+    <ChannelEdit ref="dialog" @success="onSuccess" />
   </PageContainer>
 </template>
 <style lang="scss" scoped></style>
