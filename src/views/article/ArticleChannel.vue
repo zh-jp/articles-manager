@@ -16,14 +16,11 @@ const getChannelList = async () => {
   loading.value = false
 }
 getChannelList()
-const onAddChannel = () => {
-  dialog.value.open({})
-}
-const onEditChannel = (row: Record<string, any>) => {
-  row.is_edit = true
-  dialog.value.open(row)
-}
-const onDelChanel = (row: object | any) => {
+const onAddChannel = () => dialog.value.open({})
+
+const onEditChannel = (row: Record<string, any>) => dialog.value.open(row)
+
+const onDelChanel = (row: Record<string, any>) => {
   ElMessageBox.confirm('确认要删除该分类吗?', 'Warning', {
     confirmButtonText: '删除',
     cancelButtonText: '取消',
@@ -51,7 +48,7 @@ const onSuccess = () => {
       <el-table-column prop="cate_name" label="分类名称" />
       <el-table-column prop="cate_alias" label="分类别名" />
       <el-table-column label="操作" width="150">
-        <!-- row: chanelList 的一个对象，$index：下表-->
+        <!-- row: chanelList 的一个对象，$index：下表，使用插槽引入-->
         <template #default="{ row }">
           <el-button
             :icon="Edit"

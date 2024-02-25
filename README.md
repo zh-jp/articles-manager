@@ -1,3 +1,4 @@
+# 初始化
 1. 使用 pnpm 管理依赖
 ```bash
 npm install -g pnpm
@@ -22,3 +23,9 @@ husky (git hooks 工具)往远程仓库提交内容前，触发钩子检查代�
 添加了 lint-staged 仅检查暂存区新添加的代码
 
 sass 预处理样式
+
+# 教程
+
+[接口文档](https://apifox.com/apidoc/shared-26c67aee-0233-4d23-aab7-08448fdf95ff/api-93850835)
+
+[学习视频](https://www.bilibili.com/video/BV1HV4y1a7n4)

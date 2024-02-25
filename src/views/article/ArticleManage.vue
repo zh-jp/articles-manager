@@ -1,27 +1,57 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import ChannelSelect from './components/ChannelSelect.vue'
-const getArticleList = () => {}
-const onAddArticle = () => {}
-getArticleList()
+import { getArticleListService } from '@/api/articleManage'
+import { Delete, Edit } from '@element-plus/icons-vue'
+import formatTime from '@/utils/formatTime'
+import ArticleEdit from './components/ArticleEdit.vue'
+
 // 请求参数
-const params = ref({
+const params: Ref<Record<string, any>> = ref({
   pagenum: 1,
-  pageSize: 5,
+  pagesize: 5,
   cate_id: '',
   state: ''
 })
+const loading: Ref<boolean> = ref(false)
+const articleList: Ref<Record<string, any>[]> = ref([])
+const total: Ref<number> = ref(0)
+const getArticleList = async () => {
+  loading.value = true
+  articleList.value = (await getArticleListService(params.value)).data.data
+  loading.value = false
+}
+getArticleList()
 const stateOptions = ref([
   { label: '已发布', value: 1 },
   { label: '未发布', value: 0 }
 ])
 
-const onSearch = () => {}
+const onSearch = () => {
+  params.value.pagenum = 1
+  getArticleList()
+}
 const onRest = () => {
   params.value.pagenum = 1
   params.value.cate_id = ''
   params.value.state = ''
+  getArticleList()
 }
+
+const handleSizeChange = (val: number) => {
+  params.value.pagesize = val
+  getArticleList()
+}
+const handleCurrentChange = (val: number) => {
+  params.value.pagenum = val
+  getArticleList()
+}
+const articleRef = ref()
+const onAddArticle = () => {
+  articleRef.value.open({})
+}
+const onEditArticle = (row: Record<string, any>) => {}
+const onDelArticle = (row: Record<string, any>) => {}
 </script>
 
 <template>
@@ -57,5 +87,49 @@ const onRest = () => {
         <el-button @click="onRest" type="warning">重置</el-button>
       </el-form-item>
     </el-form>
+
+    <!-- 表格区域 -->
+    <el-table :data="articleList" v-loading="loading">
+      <el-table-column label="文章标题" prop="title">
+        <template #default="{ row }">
+          <el-link type="primary" :underline="false">{{ row.title }}</el-link>
+        </template>
+      </el-table-column>
+      <el-table-column label="分类" prop="cate_name" />
+      <el-table-column label="发布时间" prop="pub_date">
+        <template #default="{ row }"> {{ formatTime(row.pub_date) }}</template>
+      </el-table-column>
+      <el-table-column label="操作"
+        ><template #default="{ row }">
+          <el-button
+            :icon="Edit"
+            circle
+            plain
+            type="primary"
+            @click="onEditArticle(row)"
+          />
+          <el-button
+            :icon="Delete"
+            circle
+            plain
+            type="danger"
+            @click="onDelArticle(row)"
+          /> </template
+      ></el-table-column>
+      <template #empty> <el-empty description="暂时还没有文章" /> </template>
+      <el-pagination
+        v-model:current-page="params.pagenum"
+        v-model:page-size="params.pageszie"
+        :page-sizes="[5, 10]"
+        background
+        layout="jumper, total, sizes, prev, pager, next"
+        :total="total"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        style="margin-top: 20px; justify-content: flex-end"
+      />
+    </el-table>
+    <!-- drawer 组件 -->
+    <ArticleEdit ref="articleRef" />
   </PageContainer>
 </template>

@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, type Ref } from 'vue'
 import { type FormInstance, type FormRules } from 'element-plus'
 import { addChannelService, updateChannelService } from '@/api/articleChannel'
-const dialogVisible = ref(false)
-const ruleForm = reactive({
+const dialogVisible: Ref<boolean> = ref(false)
+const ruleForm = reactive<Record<string, any>>({
   cate_name: '',
-  cate_alias: '',
-  is_edit: false
+  cate_alias: ''
 })
 const rules = reactive<FormRules<typeof ruleForm>>({
   cate_name: [
@@ -27,7 +26,7 @@ const rules = reactive<FormRules<typeof ruleForm>>({
   ]
 })
 const ruleFormRef = ref<FormInstance>()
-const open = (row: object | any) => {
+const open = (row: Record<string, any>) => {
   dialogVisible.value = true
   Object.assign(ruleForm, row)
 }
@@ -39,7 +38,7 @@ const onSubmit = async (form: FormInstance | undefined) => {
   if (!form) return
   await form.validate(async (valid) => {
     if (valid) {
-      if (ruleForm.is_edit) {
+      if (ruleForm.id) {
         // 编辑分类
         await updateChannelService(ruleForm)
         ElMessage.success('编辑成功')
@@ -58,7 +57,7 @@ const onSubmit = async (form: FormInstance | undefined) => {
   <el-dialog
     v-model="dialogVisible"
     width="30%"
-    :title="ruleForm.is_edit ? '编辑分类' : '添加分类'"
+    :title="ruleForm.id ? '编辑分类' : '添加分类'"
   >
     <el-form
       :model="ruleForm"

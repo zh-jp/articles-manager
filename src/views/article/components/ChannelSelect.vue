@@ -19,14 +19,14 @@ defineProps({
     default: '160px'
   }
 })
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:cid'])
 </script>
 <template>
   <!-- 父组件传来的 modelValue 不能使用v-model绑定 -->
   <!-- 通过 emit 向父组件传递事件 $event -->
   <el-select
     :model-value="cid"
-    @update:model-value="emit('update:modelValue', $event)"
+    @update:model-value="emit('update:cid', $event)"
     placeholder="请选择文章分类"
     :style="{ width }"
   >

@@ -1,35 +1,25 @@
 import request from '@/utils/request'
 
 // 获取-文章列表
-export const getArticleListServe = (
-  pagenum: number,
-  pagesize: string | any,
-  cate_id: string | any,
-  state: string | any
-) =>
+export const getArticleListService = (data: object) =>
   request.get('/my/article/list', {
-    params: {
-      pagenum,
-      pagesize,
-      cate_id,
-      state
-    }
+    params: { ...data }
   })
 
 // 删除-文章
-export const deleteArticleServe = (id: string) =>
+export const deleteArticleService = (id: string) =>
   request.delete('/my/article/info', {
     params: { id }
   })
 
 // 获取-文章详情
-export const getArticleDetailServe = (id: string) =>
+export const getArticleDetailService = (id: string) =>
   request.get('/my/article/info', {
     params: { id }
   })
 
 // 发布-文章
-export const addArticleServe = (
+export const addArticleService = (
   title: string,
   cate_id: string,
   content: string,
@@ -45,7 +35,7 @@ export const addArticleServe = (
   })
 
 // 更新-文章详情
-export const updateArticleServe = (
+export const updateArticleService = (
   id: string,
   title: string,
   cate_id: string,
