@@ -44,7 +44,7 @@ const onSuccess = () => {
 <template>
   <PageContainer title="文章类型">
     <template #extra>
-      <el-button @click="onAddChannel">添加分类</el-button>
+      <el-button @click="onAddChannel" type="primary">添加分类</el-button>
     </template>
     <el-table v-loading="loading" :data="channelList" style="width: 100%">
       <el-table-column type="index" label="序号" width="100" />
