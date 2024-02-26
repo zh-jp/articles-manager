@@ -110,7 +110,7 @@ const handleCommand = async (key: string) => {
       <el-main>
         <router-view />
       </el-main>
-      <el-footer>网站管理系统 Copyright &copy; Xx</el-footer>
+      <el-footer>文章管理系统 Copyright &copy; Xx</el-footer>
     </el-container>
   </el-container>
 </template>

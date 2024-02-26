@@ -40,7 +40,7 @@ instance.interceptors.response.use(
   },
   function (error) {
     // 若是 401 表示权限不足或token过期
-    console.log(error)
+    console.log('权限不足，请重新登录', error)
 
     if (error.response.data.code === 401) {
       router.push('/login')

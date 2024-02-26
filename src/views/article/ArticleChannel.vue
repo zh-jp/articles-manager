@@ -73,4 +73,3 @@ const onSuccess = () => {
     <ChannelEdit ref="dialog" @success="onSuccess" />
   </PageContainer>
 </template>
-<style lang="scss" scoped></style>
