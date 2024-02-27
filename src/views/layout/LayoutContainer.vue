@@ -53,12 +53,13 @@ const handleCommand = async (key: string) => {
           <span>文章分类</span>
         </el-menu-item>
 
-        <el-sub-menu index="/user/profile">
+        <el-sub-menu index="/user">
           <!-- 多级菜单标题-具名插槽 title -->
           <template #title>
             <el-icon><UserFilled /></el-icon>
             <span>个人中心</span>
           </template>
+
           <!-- 展开的内容-默认插槽 -->
           <el-menu-item index="/user/profile">
             <el-icon><User /></el-icon>

@@ -5,6 +5,7 @@ import { getArticleListService } from '@/api/articleManage'
 import { Delete, Edit } from '@element-plus/icons-vue'
 import formatTime from '@/utils/formatTime'
 import ArticleEdit from './components/ArticleEdit.vue'
+import { onMounted } from 'vue'
 
 // 请求参数
 const params: Ref<Record<string, any>> = ref({
@@ -18,13 +19,17 @@ const articleList: Ref<Record<string, any>[]> = ref([])
 const total: Ref<number> = ref(0)
 const getArticleList = async () => {
   loading.value = true
-  articleList.value = (await getArticleListService(params.value)).data.data
+  const { data } = await getArticleListService(params.value)
+  articleList.value = data.data
+  total.value = data.total
   loading.value = false
 }
-getArticleList()
+onMounted(() => {
+  getArticleList()
+})
 const stateOptions = ref([
-  { label: '已发布', value: 1 },
-  { label: '未发布', value: 0 }
+  { label: '已发布', value: 0 },
+  { label: '草稿', value: 1 }
 ])
 
 const onSearch = () => {
@@ -37,11 +42,13 @@ const onRest = () => {
   params.value.state = ''
   getArticleList()
 }
-
+// 处理每页 size 变化
 const handleSizeChange = (val: number) => {
+  params.value.pagenum = 1
   params.value.pagesize = val
   getArticleList()
 }
+// 处理页码变化
 const handleCurrentChange = (val: number) => {
   params.value.pagenum = val
   getArticleList()
@@ -50,7 +57,18 @@ const articleRef = ref()
 const onAddArticle = () => {
   articleRef.value.open({})
 }
-const onEditArticle = (row: Record<string, any>) => {}
+const onSuccess = (type: string) => {
+  if (type === 'add') {
+    const lastPage: number = Math.ceil(
+      (total.value + 1) / params.value.pagesize
+    )
+    params.value.pagenum = lastPage
+  }
+  getArticleList()
+}
+const onEditArticle = (row: Record<string, any>) => {
+  articleRef.value.open(row)
+}
 const onDelArticle = (row: Record<string, any>) => {}
 </script>
 
@@ -117,19 +135,20 @@ const onDelArticle = (row: Record<string, any>) => {}
           /> </template
       ></el-table-column>
       <template #empty> <el-empty description="暂时还没有文章" /> </template>
-      <el-pagination
-        v-model:current-page="params.pagenum"
-        v-model:page-size="params.pageszie"
-        :page-sizes="[5, 10]"
-        background
-        layout="jumper, total, sizes, prev, pager, next"
-        :total="total"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        style="margin-top: 20px; justify-content: flex-end"
-      />
     </el-table>
     <!-- drawer 组件 -->
-    <ArticleEdit ref="articleRef" />
+    <ArticleEdit ref="articleRef" @success="onSuccess" />
+    <!-- 分页 组件 -->
+    <el-pagination
+      v-model:current-page="params.pagenum"
+      v-model:page-size="params.pagesize"
+      :page-sizes="[5, 10]"
+      background
+      layout="jumper, total, sizes, prev, pager, next"
+      :total="total"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      style="margin-top: 20px; justify-content: flex-end"
+    />
   </PageContainer>
 </template>

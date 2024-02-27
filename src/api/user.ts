@@ -10,3 +10,18 @@ export const userLoginService = ({ username, password }: any) =>
 
 // 获取用户信息
 export const userGetInfoService = () => request.get('/my/userinfo')
+
+// 更新-用户基本资料
+export const userUpdateInfoService = (data: any) =>
+  request.put('/my/userinfo', data)
+
+// 更新-用户头像
+export const userUpdateAvatarService = (avatar: string) =>
+  request.patch('/my/update/avatar', { avatar })
+
+// 更新-用户密码
+export const userUpdatePasswordService = (
+  old_pwd: string,
+  new_pwd: string,
+  re_pwd: string
+) => request.patch('/my/updatepwd', { old_pwd, new_pwd, re_pwd })

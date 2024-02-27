@@ -1,11 +1,21 @@
 <script setup lang="ts">
 import { type Ref, ref, reactive } from 'vue'
-import { type FormInstance, type UploadFile } from 'element-plus'
+import {
+  type FormInstance,
+  type UploadFile,
+  type FormRules
+} from 'element-plus'
 import { getArticleDetailService } from '@/api/articleManage'
 import ChannelSelect from './ChannelSelect.vue'
 import { Plus } from '@element-plus/icons-vue'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
+import {
+  publishArticleService,
+  updateArticleService
+} from '@/api/articleManage'
+import { baseURL } from '@/utils/request'
+import urlToFile from '@/utils/url2File'
 
 const drawerVisible: Ref<boolean> = ref(false)
 const direction: Ref<any> = ref('rtl')
@@ -19,29 +29,84 @@ const ruleForm = reactive<Record<string, any>>({
   cover_img: '',
   state: ''
 })
+
+const rules = reactive<FormRules<typeof ruleForm>>({
+  title: [
+    { required: true, message: '请输入文章标题', trigger: 'blur' },
+    {
+      pattern: /^\S{1,50}$/,
+      message: '标题必须是 1-50 位的非空字符',
+      trigger: 'blur'
+    }
+  ],
+  cate_id: [{ required: true, message: '请选择文章分类', trigger: 'change' }],
+  content: [{ required: true, message: '请输入文章内容', trigger: 'blur' }],
+  cover_img: [{ required: true, message: '请上传文章封面', trigger: 'change' }]
+})
+const ruleFormRef = ref<FormInstance>()
+const editorRef = ref()
 const open = async (row: Record<string, any>) => {
   drawerVisible.value = true
   if (row.id) {
     const {
       data: { data }
     } = await getArticleDetailService(row.id)
+    // 此时的图像是网络地址，返回后端时需要转为 File 对象
+    imgUrl.value = baseURL + data.cover_img
+    data.cover_img.File = urlToFile(imgUrl.value, data.cover_img)
+    console.log('cover_img', data.cover_img.File)
+
     Object.assign(ruleForm, data)
+  } else {
+    Object.assign(ruleForm, {
+      title: '',
+      cate_id: '',
+      content: '',
+      cover_img: '',
+      state: ''
+    })
+    imgUrl.value = ''
+
+    editorRef.value.setHTML('') // 清空富文本编辑器内容：需要使用vue-quill组件提供的ref属性
   }
 }
 defineExpose({
   open
 })
 
-const ruleFormRef = ref<FormInstance>()
-const onPublish = (state: number) => {}
+const emit = defineEmits(['success'])
+
+const onPublish = async (formRef: FormInstance | undefined, state: number) => {
+  ruleForm.state = state == 0 ? '已发布' : '草稿'
+  if (!formRef) return
+  await formRef.validate(async (valid) => {
+    if (valid) {
+      const fd = new FormData() // 后端要求，如果不转为 FormData 格式，会报错
+      for (let key in ruleForm) {
+        fd.append(key, ruleForm[key])
+      }
+      if (ruleForm.id) {
+        await updateArticleService(fd)
+        ElMessage.success('编辑成功')
+        emit('success', 'edit')
+      } else {
+        await publishArticleService(fd)
+        ElMessage.success('添加成功')
+        emit('success', 'add')
+      }
+    }
+  })
+  drawerVisible.value = false
+}
 
 const imgUrl: Ref<string> = ref('')
 const onSelectFile = (uploadFile: UploadFile | any) => {
+  // 取消自动上传后，Upload 组件提供的 UploadFile 类型对象不会返回 response 和 url
+  // 相对的，会有 raw 属性，它是一个 File 对象
+  // 通过 URL.createObjectURL 方法，输入对象是File或Blob生成一个临时的 URL 预览
   imgUrl.value = URL.createObjectURL(uploadFile.raw)
   ruleForm.cover_img = uploadFile.raw
 }
-
-const editorRef = ref<FormInstance>()
 </script>
 <template>
   <el-drawer
@@ -51,7 +116,12 @@ const editorRef = ref<FormInstance>()
     :before-close="handleClose"
     size="60%"
   >
-    <el-form :model="ruleForm" ref="ruleFormRef" label-width="100px">
+    <el-form
+      :model="ruleForm"
+      ref="ruleFormRef"
+      label-width="100px"
+      :rules="rules"
+    >
       <el-form-item label="文章标题" prop="title">
         <el-input v-model="ruleForm.title" placeholder="请输入标题" />
       </el-form-item>
@@ -82,8 +152,12 @@ const editorRef = ref<FormInstance>()
         </div>
       </el-form-item>
       <el-form-item>
-        <el-button @click="onPublish(0)" type="primary">发布</el-button>
-        <el-button @click="onPublish(1)" type="info">草稿</el-button>
+        <el-button @click="onPublish(ruleFormRef, 0)" type="primary"
+          >发布</el-button
+        >
+        <el-button @click="onPublish(ruleFormRef, 1)" type="info"
+          >草稿</el-button
+        >
       </el-form-item>
     </el-form>
   </el-drawer>
